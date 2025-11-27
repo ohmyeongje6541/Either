@@ -166,6 +166,105 @@
       }
     }
 
+    /* 🎆 폭죽 효과 - 더 크고 화려하게 */
+    .firework-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 5;
+    }
+
+    .firework {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: fireworkExplode 2s ease-out forwards;
+    }
+
+    @keyframes fireworkExplode {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(var(--fly-distance)) translateX(var(--fly-angle));
+        opacity: 0;
+        scale: 0;
+      }
+    }
+
+    .firework-center {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      animation: fireworkCenter 2s ease-out forwards;
+    }
+
+    @keyframes fireworkCenter {
+      0% {
+        transform: scale(0);
+        opacity: 1;
+      }
+      15% {
+        transform: scale(3);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(0);
+        opacity: 0;
+      }
+    }
+
+    /* 💥 클릭 이펙트 */
+    .click-ripple {
+      position: fixed;
+      border-radius: 50%;
+      border: 3px solid;
+      pointer-events: none;
+      animation: rippleExpand 0.8s ease-out forwards;
+      z-index: 9999;
+    }
+
+    @keyframes rippleExpand {
+      0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+      }
+      100% {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+      }
+    }
+
+    .click-burst {
+      position: fixed;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: burstFly 0.6s ease-out forwards;
+      z-index: 9999;
+    }
+
+    @keyframes burstFly {
+      0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--bx), var(--by)) scale(0);
+        opacity: 0;
+      }
+    }
+
     .container {
       width: 800px;
       margin: 50px auto;
@@ -288,6 +387,9 @@
 <div class="shockwave shockwave-left"></div>
 <div class="shockwave shockwave-right"></div>
 
+<!-- 🎆 폭죽 컨테이너 -->
+<div class="firework-container" id="fireworkContainer"></div>
+
 <!-- ⚡ 스파크 파티클 -->
 <div class="spark-container">
   <div class="spark" style="left: 20%; top: 30%; --tx: 50px; --ty: -80px; animation-delay: 0s;"></div>
@@ -330,6 +432,124 @@
     </tbody>
   </table>
 </div>
+
+<script>
+  // 🎆 대형 폭죽 효과 생성
+  function createFirework(x, y) {
+    const container = document.getElementById('fireworkContainer');
+    const colors = ['#60a5fa', '#f87171', '#fbbf24', '#34d399', '#a78bfa', '#fb923c'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+
+    // 중심 폭발 - 더 크게
+    const center = document.createElement('div');
+    center.className = 'firework-center';
+    center.style.left = x + 'px';
+    center.style.top = y + 'px';
+    center.style.background = color;
+    center.style.boxShadow = `0 0 50px ${color}, 0 0 100px ${color}`;
+    container.appendChild(center);
+
+    // 폭죽 파티클 50개로 증가
+    const particleCount = 50;
+    for (let i = 0; i < particleCount; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'firework';
+      particle.style.left = x + 'px';
+      particle.style.top = y + 'px';
+      particle.style.background = color;
+      particle.style.boxShadow = `0 0 15px ${color}, 0 0 30px ${color}`;
+
+      const angle = (Math.PI * 2 * i) / particleCount;
+      const distance = 120 + Math.random() * 80; // 더 멀리 퍼짐
+      const flyX = Math.cos(angle) * distance;
+      const flyY = Math.sin(angle) * distance;
+
+      particle.style.setProperty('--fly-angle', flyX + 'px');
+      particle.style.setProperty('--fly-distance', flyY + 'px');
+      particle.style.animationDelay = Math.random() * 0.1 + 's';
+
+      container.appendChild(particle);
+
+      setTimeout(() => particle.remove(), 2100);
+    }
+
+    setTimeout(() => center.remove(), 2100);
+  }
+
+  // 랜덤 위치에 폭죽 생성
+  function randomFirework() {
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * (window.innerHeight * 0.7);
+    createFirework(x, y);
+  }
+
+  // 💥 1초마다 폭죽 터뜨리기
+  setInterval(randomFirework, 1000);
+
+  // 페이지 로드 시 바로 첫 폭죽
+  randomFirework();
+
+  // 💥 클릭 이펙트
+  document.addEventListener('click', function(e) {
+    const colors = ['#60a5fa', '#f87171', '#fbbf24', '#34d399', '#a78bfa', '#fb923c'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+
+    // 파동 효과
+    const ripple = document.createElement('div');
+    ripple.className = 'click-ripple';
+    ripple.style.left = (e.clientX - 100) + 'px';
+    ripple.style.top = (e.clientY - 100) + 'px';
+    ripple.style.borderColor = color;
+    document.body.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 800);
+
+    // 파티클 터지는 효과
+    for (let i = 0; i < 12; i++) {
+      const burst = document.createElement('div');
+      burst.className = 'click-burst';
+      burst.style.left = e.clientX + 'px';
+      burst.style.top = e.clientY + 'px';
+      burst.style.background = color;
+      burst.style.boxShadow = `0 0 10px ${color}`;
+
+      const angle = (Math.PI * 2 * i) / 12;
+      const distance = 50 + Math.random() * 30;
+      const bx = Math.cos(angle) * distance;
+      const by = Math.sin(angle) * distance;
+
+      burst.style.setProperty('--bx', bx + 'px');
+      burst.style.setProperty('--by', by + 'px');
+
+      document.body.appendChild(burst);
+      setTimeout(() => burst.remove(), 600);
+    }
+  });
+
+  // 상세보기 버튼 클릭시 큰 폭죽
+  document.querySelectorAll('.detail-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation(); // 클릭 이펙트와 중복 방지
+      const rect = btn.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      createFirework(x, y);
+    });
+  });
+
+  // 랜덤 질문 버튼 클릭시 폭죽 5연발
+  document.querySelector('.random-btn')?.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const rect = this.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+
+    createFirework(x - 80, y - 40);
+    setTimeout(() => createFirework(x + 80, y - 40), 100);
+    setTimeout(() => createFirework(x, y + 50), 200);
+    setTimeout(() => createFirework(x - 50, y + 30), 300);
+    setTimeout(() => createFirework(x + 50, y + 30), 400);
+  });
+</script>
 
 </body>
 </html>

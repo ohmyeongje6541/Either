@@ -214,6 +214,7 @@
       font-weight: 600;
       transition: 0.25s ease;
       overflow: hidden;
+      border: 3px solid transparent;
     }
 
     .vote-option:hover {
@@ -223,6 +224,83 @@
 
     .opt-A { background: linear-gradient(90deg, #60a5fa, #3b82f6); }
     .opt-B { background: linear-gradient(90deg, #f87171, #ef4444); }
+
+    /* 🌋 선택된 버튼 - 마그마 효과 */
+    .vote-option.selected {
+      animation: magmaPulse 1.5s ease-in-out infinite;
+    }
+
+    .opt-A.selected {
+      background: linear-gradient(90deg, #1e40af, #1e3a8a, #1e40af);
+      background-size: 200% 100%;
+      animation: magmaFlow 2s linear infinite, magmaPulse 1.5s ease-in-out infinite;
+      border: 3px solid #60a5fa;
+      box-shadow:
+          0 0 30px rgba(59, 130, 246, 0.8),
+          0 0 60px rgba(59, 130, 246, 0.5),
+          inset 0 0 30px rgba(59, 130, 246, 0.3);
+    }
+
+    .opt-B.selected {
+      background: linear-gradient(90deg, #991b1b, #7f1d1d, #991b1b);
+      background-size: 200% 100%;
+      animation: magmaFlow 2s linear infinite, magmaPulse 1.5s ease-in-out infinite;
+      border: 3px solid #f87171;
+      box-shadow:
+          0 0 30px rgba(239, 68, 68, 0.8),
+          0 0 60px rgba(239, 68, 68, 0.5),
+          inset 0 0 30px rgba(239, 68, 68, 0.3);
+    }
+
+    @keyframes magmaFlow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    @keyframes magmaPulse {
+      0%, 100% {
+        transform: scale(1);
+        filter: brightness(1);
+      }
+      50% {
+        transform: scale(1.02);
+        filter: brightness(1.2);
+      }
+    }
+
+    /* 🌋 마그마 레이어 */
+    .magma-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .selected .magma-layer {
+      opacity: 1;
+    }
+
+    .opt-A .magma-layer {
+      background:
+          radial-gradient(circle at 20% 50%, rgba(96, 165, 250, 0.6), transparent 40%),
+          radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.6), transparent 40%);
+      animation: magmaBubble 3s ease-in-out infinite;
+    }
+
+    .opt-B .magma-layer {
+      background:
+          radial-gradient(circle at 20% 50%, rgba(248, 113, 113, 0.6), transparent 40%),
+          radial-gradient(circle at 80% 50%, rgba(239, 68, 68, 0.6), transparent 40%);
+      animation: magmaBubble 3s ease-in-out infinite;
+    }
+
+    @keyframes magmaBubble {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-10px) scale(1.1); }
+    }
 
     /* 🔥 투표 퍼센트 애니메이션 바 */
     .percent-bar {
@@ -240,6 +318,55 @@
     .percent-text {
       position: relative;
       z-index: 2;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    /* 💥 클릭 임팩트 파티클 */
+    .impact-particle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 100;
+      animation: impactBurst 0.8s ease-out forwards;
+    }
+
+    @keyframes impactBurst {
+      0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--ix), var(--iy)) scale(0);
+        opacity: 0;
+      }
+    }
+
+    /* 💥 충격파 효과 */
+    .shockwave-ring {
+      position: absolute;
+      border-radius: 12px;
+      border: 4px solid;
+      pointer-events: none;
+      animation: shockwaveExpand 0.6s ease-out forwards;
+    }
+
+    @keyframes shockwaveExpand {
+      0% {
+        width: 100%;
+        height: 100%;
+        opacity: 1;
+        top: 0;
+        left: 0;
+      }
+      100% {
+        width: 150%;
+        height: 150%;
+        opacity: 0;
+        top: -25%;
+        left: -25%;
+      }
     }
 
     .hidden-radio { display: none; }
@@ -433,6 +560,7 @@
     <label>
       <input class="hidden-radio vote-radio" type="radio" name="answerText" value="A" required>
       <div class="vote-option opt-A vote-btn">
+        <div class="magma-layer"></div>
         <div class="percent-bar barA"></div>
         <div class="percent-text">
           A — <span th:text="${question.optionA}"></span>
@@ -445,6 +573,7 @@
     <label>
       <input class="hidden-radio vote-radio" type="radio" name="answerText" value="B">
       <div class="vote-option opt-B vote-btn">
+        <div class="magma-layer"></div>
         <div class="percent-bar barB"></div>
         <div class="percent-text">
           B — <span th:text="${question.optionB}"></span>
@@ -487,15 +616,85 @@
 </div>
 
 <script>
-  /* 라디오 선택시 테두리 강조 */
+  /* 🌋 라디오 선택시 마그마 효과 */
   document.querySelectorAll('.vote-radio').forEach(radio => {
     radio.addEventListener('change', function() {
-      document.querySelectorAll('.vote-option').forEach(opt => opt.style.boxShadow = 'none');
-      this.parentElement.querySelector('.vote-option').style.boxShadow = '0 0 0 3px rgba(255,255,255,0.5)';
+      // 모든 선택 해제
+      document.querySelectorAll('.vote-option').forEach(opt => {
+        opt.classList.remove('selected');
+        opt.style.boxShadow = 'none';
+      });
+
+      // 선택된 버튼에 마그마 효과
+      const selectedOption = this.parentElement.querySelector('.vote-option');
+      selectedOption.classList.add('selected');
+      selectedOption.style.boxShadow = '0 0 0 3px rgba(255,255,255,0.5)';
+
+      // 💥 강력한 임팩트 효과
+      createImpact(selectedOption);
     });
   });
 
-  /* ✨ 클릭시 파티클 터짐 */
+  /* 💥 임팩트 효과 생성 */
+  function createImpact(element) {
+    const rect = element.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    // 버튼이 A인지 B인지 확인
+    const isA = element.classList.contains('opt-A');
+    const color = isA ? '#60a5fa' : '#f87171';
+
+    // 충격파 링
+    for (let i = 0; i < 3; i++) {
+      setTimeout(() => {
+        const ring = document.createElement('div');
+        ring.className = 'shockwave-ring';
+        ring.style.position = 'absolute';
+        ring.style.borderColor = color;
+        ring.style.top = '0';
+        ring.style.left = '0';
+        ring.style.width = '100%';
+        ring.style.height = '100%';
+        element.appendChild(ring);
+        setTimeout(() => ring.remove(), 600);
+      }, i * 100);
+    }
+
+    // 파티클 폭발 (40개)
+    for (let i = 0; i < 40; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'impact-particle';
+      particle.style.background = color;
+      particle.style.boxShadow = `0 0 15px ${color}`;
+      particle.style.left = (rect.width / 2) + 'px';
+      particle.style.top = (rect.height / 2) + 'px';
+
+      const angle = (Math.PI * 2 * i) / 40;
+      const distance = 80 + Math.random() * 60;
+      const ix = Math.cos(angle) * distance;
+      const iy = Math.sin(angle) * distance;
+
+      particle.style.setProperty('--ix', ix + 'px');
+      particle.style.setProperty('--iy', iy + 'px');
+
+      element.appendChild(particle);
+      setTimeout(() => particle.remove(), 800);
+    }
+
+    // 화면 흔들림 효과
+    element.style.animation = 'none';
+    setTimeout(() => {
+      element.style.animation = '';
+    }, 10);
+
+    // 진동 효과
+    if (navigator.vibrate) {
+      navigator.vibrate([100, 50, 100]);
+    }
+  }
+
+  /* ✨ 클릭시 파티클 터짐 (기존 유지) */
   function explode(btn){
     for(let i=0;i<12;i++){
       const p = document.createElement('span');
