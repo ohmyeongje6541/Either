@@ -59,6 +59,9 @@ public class QuestionController {
         model.addAttribute("percentA", percentA);
         model.addAttribute("percentB", percentB);
 
+        // ✨ 이 부분 추가!
+        model.addAttribute("answers", answerService.findByQuestion(q));
+
         model.addAttribute("answer", new Answer());
 
         return "questions/detail";
