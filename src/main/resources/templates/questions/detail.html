@@ -1,29 +1,527 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${question.title}"></title>
+
+  <style>
+    /* 🔥 활활 타오르는 배경 */
+    body {
+      font-family: "Pretendard", sans-serif;
+      background:
+          linear-gradient(0deg, #000000 0%, #1a0505 15%, #330a0a 30%, #4d1010 45%, #661515 60%, #4d1010 75%, #1a0505 90%, #000000 100%);
+      background-size: 100% 300%;
+      animation: flameRoar 4s ease-in-out infinite;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      color: white;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    @keyframes flameRoar {
+      0%, 100% { background-position: 0% 0%; }
+      25% { background-position: 0% 40%; }
+      50% { background-position: 0% 100%; }
+      75% { background-position: 0% 60%; }
+    }
+
+    .fire-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+          radial-gradient(ellipse at 50% 120%, rgba(255,69,0,0.6) 0%, rgba(255,140,0,0.4) 20%, transparent 60%),
+          radial-gradient(ellipse at 20% 100%, rgba(255,100,0,0.5) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 110%, rgba(255,120,0,0.55) 0%, transparent 55%),
+          radial-gradient(ellipse at 35% 95%, rgba(255,200,0,0.4) 0%, transparent 45%),
+          radial-gradient(ellipse at 65% 105%, rgba(255,180,0,0.45) 0%, transparent 50%);
+      animation: fireWave 2s ease-in-out infinite;
+    }
+
+    @keyframes fireWave {
+      0%, 100% {
+        opacity: 0.8;
+        transform: scale(1) translateY(0);
+      }
+      25% {
+        opacity: 1;
+        transform: scale(1.05) translateY(-15px);
+      }
+      50% {
+        opacity: 0.9;
+        transform: scale(1.1) translateY(-30px);
+      }
+      75% {
+        opacity: 1;
+        transform: scale(1.05) translateY(-15px);
+      }
+    }
+
+    /* 🔥 불꽃 파티클 - 더 많이, 더 빠르게 */
+    .floating-particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .floating-particle {
+      position: absolute;
+      width: 4px;
+      height: 12px;
+      background: linear-gradient(to top, #ff0000, #ff4500, #ffa500, transparent);
+      border-radius: 50% 50% 0 0;
+      box-shadow:
+          0 0 15px #ff6600,
+          0 0 30px rgba(255,100,0,0.5);
+      animation: fireFloat 3s infinite ease-in;
+      bottom: -10%;
+      filter: blur(0.5px);
+    }
+
+    @keyframes fireFloat {
+      0% {
+        transform: translateY(0) translateX(0) scale(1) rotate(0deg);
+        opacity: 1;
+      }
+      20% {
+        transform: translateY(-20vh) translateX(15px) scale(1.3) rotate(10deg);
+        opacity: 1;
+      }
+      40% {
+        transform: translateY(-45vh) translateX(-10px) scale(1.1) rotate(-5deg);
+        opacity: 0.9;
+      }
+      60% {
+        transform: translateY(-70vh) translateX(25px) scale(0.9) rotate(15deg);
+        opacity: 0.7;
+      }
+      80% {
+        transform: translateY(-95vh) translateX(-15px) scale(0.6) rotate(-10deg);
+        opacity: 0.4;
+      }
+      100% {
+        transform: translateY(-120vh) translateX(10px) scale(0.3) rotate(20deg);
+        opacity: 0;
+      }
+    }
+
+    /* 🔥 큰 불꽃 효과 - 더 강렬하게 */
+    .fire-ember {
+      position: absolute;
+      width: 8px;
+      height: 16px;
+      background: linear-gradient(to top, #cc0000, #ff0000, #ff4500, #ff8800, #ffaa00);
+      border-radius: 50% 50% 0 0;
+      box-shadow:
+          0 0 25px #ff4500,
+          0 0 50px rgba(255,69,0,0.7),
+          0 0 75px rgba(255,100,0,0.4);
+      animation: emberFloat 4s infinite ease-out;
+      bottom: -5%;
+      filter: blur(0.8px);
+    }
+
+    @keyframes emberFloat {
+      0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        opacity: 1;
+      }
+      30% {
+        transform: translateY(-30vh) scale(1.4) rotate(20deg);
+        opacity: 1;
+      }
+      60% {
+        transform: translateY(-70vh) scale(1.2) rotate(-15deg);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(-120vh) scale(0.5) rotate(30deg);
+        opacity: 0;
+      }
+    }
+
+    /* 🔥 불꽃 흔들림 효과 */
+    .fire-flicker {
+      position: absolute;
+      width: 5px;
+      height: 10px;
+      background: radial-gradient(ellipse at center, #ffaa00, #ff6600, transparent);
+      border-radius: 50%;
+      animation: flicker 0.15s infinite alternate;
+      bottom: 0;
+      opacity: 0.7;
+    }
+
+    @keyframes flicker {
+      0% { transform: scaleY(1) scaleX(1); opacity: 0.7; }
+      100% { transform: scaleY(1.2) scaleX(0.9); opacity: 0.9; }
+    }
+
+    /* 컨테이너 - 불꽃에 감싸인 느낌 */
+    .container {
+      width: 650px;
+      margin: 40px 0;
+      padding: 35px;
+      background: rgba(0,0,0,0.7);
+      border-radius: 20px;
+      border: 2px solid rgba(255,100,0,0.6);
+      backdrop-filter: blur(20px);
+      box-shadow:
+          0 8px 32px rgba(255,69,0,0.6),
+          inset 0 1px 0 rgba(255,150,0,0.4),
+          0 0 60px rgba(255,69,0,0.4),
+          0 0 100px rgba(255,100,0,0.2);
+      position: relative;
+      z-index: 10;
+      animation: containerGlow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes containerGlow {
+      0% {
+        box-shadow:
+            0 8px 32px rgba(255,69,0,0.6),
+            inset 0 1px 0 rgba(255,150,0,0.4),
+            0 0 60px rgba(255,69,0,0.4),
+            0 0 100px rgba(255,100,0,0.2);
+      }
+      100% {
+        box-shadow:
+            0 8px 32px rgba(255,69,0,0.8),
+            inset 0 1px 0 rgba(255,150,0,0.5),
+            0 0 80px rgba(255,69,0,0.6),
+            0 0 120px rgba(255,100,0,0.3);
+      }
+    }
+
+    h1, h3 {
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    /* 투표 선택 */
+    .vote-option {
+      position: relative;
+      padding: 18px 20px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 600;
+      transition: 0.25s ease;
+      overflow: hidden;
+    }
+
+    .vote-option:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    }
+
+    .opt-A { background: linear-gradient(90deg, #60a5fa, #3b82f6); }
+    .opt-B { background: linear-gradient(90deg, #f87171, #ef4444); }
+
+    /* 🔥 투표 퍼센트 애니메이션 바 */
+    .percent-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      border-radius: 12px;
+      opacity: 0.35;
+      z-index: 1;
+      width: 0%;
+      transition: width 1.2s ease-out;
+    }
+
+    .percent-text {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hidden-radio { display: none; }
+
+    /* 이유 입력 */
+    .reason-box input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 15px;
+      border: 1px solid #d1d5db;
+      margin-top: 10px;
+    }
+
+    button {
+      margin-top: 25px;
+      width: 100%;
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 17px;
+      cursor: pointer;
+      transition: 0.2s;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #1e40af;
+    }
+
+    /* 투표 결과 섹션 */
+    .results-section {
+      margin-top: 40px;
+      padding-top: 30px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .results-section h3 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* ✨ 댓글 카드 스타일 개선 */
+    .comment-item {
+      background: rgba(255,255,255,0.15);
+      padding: 18px 22px;
+      border-radius: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 16px;
+      box-shadow:
+          0 4px 15px rgba(0,0,0,0.15),
+          inset 0 1px 0 rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.25);
+      transition: transform 0.2s ease;
+    }
+
+    .comment-item:hover {
+      transform: translateY(-2px);
+      box-shadow:
+          0 6px 20px rgba(0,0,0,0.2),
+          inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+
+    .comment-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .comment-content { flex: 1; }
+
+    .comment-choice {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 8px;
+      padding: 4px 12px;
+      display: inline-block;
+      border-radius: 20px;
+    }
+
+    .choice-A {
+      background: linear-gradient(90deg, #60a5fa, #3b82f6);
+      color: white;
+    }
+
+    .choice-B {
+      background: linear-gradient(90deg, #f87171, #ef4444);
+      color: white;
+    }
+
+    .comment-text {
+      color: #ffffff;
+      font-size: 15px;
+      line-height: 1.6;
+      background: rgba(0,0,0,0.2);
+      padding: 10px 14px;
+      border-radius: 10px;
+    }
+
+    .comment-text:empty {
+      display: none;
+    }
+
+    .no-results {
+      text-align: center;
+      color: #bbb;
+      font-style: italic;
+    }
+
+    /* ✨ 버튼 클릭 파티클 - 불꽃 스타일 */
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 8px;
+      background: linear-gradient(to top, #ff4500, #ffa500);
+      border-radius: 50% 50% 0 0;
+      pointer-events: none;
+      box-shadow: 0 0 10px #ff6600;
+      animation: particle-pop 600ms ease-out forwards;
+    }
+
+    @keyframes particle-pop {
+      0% { opacity: 1; transform: translate(0,0) scale(1) rotate(0deg); }
+      100% { opacity: 0; transform: translate(var(--x), var(--y)) scale(0.2) rotate(180deg); }
+    }
+  </style>
+</head>
+
 <body>
+<div class="fire-overlay"></div>
 
-<h1 th:text="${question.title}"></h1>
+<!-- 🔥 활활 타오르는 불꽃 파티클 -->
+<div class="floating-particles">
+  <!-- 작은 불꽃들 - 많이 추가 -->
+  <div class="floating-particle" style="left: 3%; animation-delay: 0s; animation-duration: 2.5s;"></div>
+  <div class="floating-particle" style="left: 8%; animation-delay: 0.3s; animation-duration: 2.8s;"></div>
+  <div class="floating-particle" style="left: 13%; animation-delay: 0.6s; animation-duration: 2.3s;"></div>
+  <div class="floating-particle" style="left: 18%; animation-delay: 0.9s; animation-duration: 2.7s;"></div>
+  <div class="floating-particle" style="left: 23%; animation-delay: 0.2s; animation-duration: 2.6s;"></div>
+  <div class="floating-particle" style="left: 28%; animation-delay: 0.5s; animation-duration: 2.4s;"></div>
+  <div class="floating-particle" style="left: 33%; animation-delay: 0.8s; animation-duration: 2.9s;"></div>
+  <div class="floating-particle" style="left: 38%; animation-delay: 0.1s; animation-duration: 2.5s;"></div>
+  <div class="floating-particle" style="left: 43%; animation-delay: 0.4s; animation-duration: 2.8s;"></div>
+  <div class="floating-particle" style="left: 48%; animation-delay: 0.7s; animation-duration: 2.6s;"></div>
+  <div class="floating-particle" style="left: 53%; animation-delay: 0s; animation-duration: 2.7s;"></div>
+  <div class="floating-particle" style="left: 58%; animation-delay: 0.3s; animation-duration: 2.4s;"></div>
+  <div class="floating-particle" style="left: 63%; animation-delay: 0.6s; animation-duration: 2.9s;"></div>
+  <div class="floating-particle" style="left: 68%; animation-delay: 0.9s; animation-duration: 2.5s;"></div>
+  <div class="floating-particle" style="left: 73%; animation-delay: 0.2s; animation-duration: 2.8s;"></div>
+  <div class="floating-particle" style="left: 78%; animation-delay: 0.5s; animation-duration: 2.3s;"></div>
+  <div class="floating-particle" style="left: 83%; animation-delay: 0.8s; animation-duration: 2.7s;"></div>
+  <div class="floating-particle" style="left: 88%; animation-delay: 0.1s; animation-duration: 2.6s;"></div>
+  <div class="floating-particle" style="left: 93%; animation-delay: 0.4s; animation-duration: 2.4s;"></div>
+  <div class="floating-particle" style="left: 97%; animation-delay: 0.7s; animation-duration: 2.9s;"></div>
 
-<h2>A 또는 B 선택</h2>
-<p>A: <span th:text="${question.optionA}"></span></p>
-<p>B: <span th:text="${question.optionB}"></span></p>
+  <!-- 큰 불씨들 - 더 많이 -->
+  <div class="fire-ember" style="left: 10%; animation-delay: 0s; animation-duration: 3.5s;"></div>
+  <div class="fire-ember" style="left: 25%; animation-delay: 1s; animation-duration: 4s;"></div>
+  <div class="fire-ember" style="left: 40%; animation-delay: 0.5s; animation-duration: 3.8s;"></div>
+  <div class="fire-ember" style="left: 55%; animation-delay: 1.5s; animation-duration: 3.6s;"></div>
+  <div class="fire-ember" style="left: 70%; animation-delay: 0.8s; animation-duration: 4.2s;"></div>
+  <div class="fire-ember" style="left: 85%; animation-delay: 1.2s; animation-duration: 3.7s;"></div>
 
-<h3>현재 투표 현황</h3>
-<p>A: <span th:text="${countA}"></span>표 (
-  <span th:text="${percentA}"></span>% )</p>
-<p>B: <span th:text="${countB}"></span>표 (
-  <span th:text="${percentB}"></span>% )</p>
+  <!-- 흔들리는 불꽃 -->
+  <div class="fire-flicker" style="left: 15%; bottom: 0; animation-delay: 0s;"></div>
+  <div class="fire-flicker" style="left: 30%; bottom: 5%; animation-delay: 0.05s;"></div>
+  <div class="fire-flicker" style="left: 45%; bottom: 0; animation-delay: 0.1s;"></div>
+  <div class="fire-flicker" style="left: 60%; bottom: 3%; animation-delay: 0.03s;"></div>
+  <div class="fire-flicker" style="left: 75%; bottom: 0; animation-delay: 0.08s;"></div>
+  <div class="fire-flicker" style="left: 90%; bottom: 4%; animation-delay: 0.06s;"></div>
+</div>
 
-<hr>
+<div class="container">
 
-<h3>투표하기</h3>
-<form th:action="@{|/questions/${question.id}/answers|}" method="post">
-  A <input type="radio" name="answerText" value="A" required><br>
-  B <input type="radio" name="answerText" value="B"><br>
+  <h1 th:text="${question.title}"></h1>
 
-  이유: <input type="text" name="content"><br>
+  <form th:action="@{|/questions/${question.id}/answers|}" method="post">
 
-  <button type="submit">투표</button>
-</form>
+    <!-- A -->
+    <label>
+      <input class="hidden-radio vote-radio" type="radio" name="answerText" value="A" required>
+      <div class="vote-option opt-A vote-btn">
+        <div class="percent-bar barA"></div>
+        <div class="percent-text">
+          A — <span th:text="${question.optionA}"></span>
+          (<span th:text="${percentA}"></span>% | <span th:text="${countA}"></span>표)
+        </div>
+      </div>
+    </label>
+
+    <!-- B -->
+    <label>
+      <input class="hidden-radio vote-radio" type="radio" name="answerText" value="B">
+      <div class="vote-option opt-B vote-btn">
+        <div class="percent-bar barB"></div>
+        <div class="percent-text">
+          B — <span th:text="${question.optionB}"></span>
+          (<span th:text="${percentB}"></span>% | <span th:text="${countB}"></span>표)
+        </div>
+      </div>
+    </label>
+
+    <div class="reason-box">
+      <h3>이유 (선택)</h3>
+      <input type="text" name="content" placeholder="선택한 이유가 있다면 적어주세요">
+    </div>
+
+    <button type="submit">🔥 투표하기 🔥</button>
+  </form>
+
+  <!-- 투표 결과 -->
+  <div class="results-section">
+    <h3>투표 결과</h3>
+
+    <div th:each="answer : ${answers}" class="comment-item">
+      <div class="comment-avatar" th:text="${answer.answerText}">A</div>
+      <div class="comment-content">
+        <div class="comment-choice" th:class="${answer.answerText == 'A'} ? 'comment-choice choice-A' : 'comment-choice choice-B'">
+          <span th:if="${answer.answerText == 'A'}" th:text="${question.optionA}">옵션A</span>
+          <span th:if="${answer.answerText == 'B'}" th:text="${question.optionB}">옵션B</span>
+          선택
+        </div>
+        <div class="comment-text" th:if="${answer.content}" th:text="${answer.content}">
+          이유 내용
+        </div>
+      </div>
+    </div>
+
+    <div class="no-results" th:if="${#lists.isEmpty(answers)}">
+      아직 투표가 없습니다. 첫 번째 투표를 해주세요!
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* 라디오 선택시 테두리 강조 */
+  document.querySelectorAll('.vote-radio').forEach(radio => {
+    radio.addEventListener('change', function() {
+      document.querySelectorAll('.vote-option').forEach(opt => opt.style.boxShadow = 'none');
+      this.parentElement.querySelector('.vote-option').style.boxShadow = '0 0 0 3px rgba(255,255,255,0.5)';
+    });
+  });
+
+  /* ✨ 클릭시 파티클 터짐 */
+  function explode(btn){
+    for(let i=0;i<12;i++){
+      const p = document.createElement('span');
+      p.classList.add('particle');
+      const angle = Math.random()*360;
+      const dist = 40 + Math.random()*22;
+      p.style.setProperty('--x', Math.cos(angle)*dist + 'px');
+      p.style.setProperty('--y', Math.sin(angle)*dist + 'px');
+      btn.appendChild(p);
+      p.addEventListener('animationend',()=>p.remove());
+    }
+  }
+
+  document.querySelectorAll('.vote-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>explode(btn));
+  });
+
+  /* ✨ 투표 결과 퍼센트가 부드럽게 차오르기 */
+  window.addEventListener("DOMContentLoaded", () => {
+    const percentA = parseFloat(document.querySelector("[th\\:text='${percentA}']")?.innerText || 0);
+    const percentB = parseFloat(document.querySelector("[th\\:text='${percentB}']")?.innerText || 0);
+
+    document.querySelector('.barA').style.width = percentA + "%";
+    document.querySelector('.barB').style.width = percentB + "%";
+  });
+</script>
+
 </body>
 </html>
