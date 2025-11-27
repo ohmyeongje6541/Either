@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<h1 th:text="${question.title}"></h1>
+
+<h2>A 또는 B 선택</h2>
+<p>A: <span th:text="${question.optionA}"></span></p>
+<p>B: <span th:text="${question.optionB}"></span></p>
+
+<h3>현재 투표 현황</h3>
+<p>A: <span th:text="${countA}"></span>표 (
+  <span th:text="${percentA}"></span>% )</p>
+<p>B: <span th:text="${countB}"></span>표 (
+  <span th:text="${percentB}"></span>% )</p>
+
+<hr>
+
+<h3>투표하기</h3>
+<form th:action="@{|/questions/${question.id}/answers|}" method="post">
+  A <input type="radio" name="answerText" value="A" required><br>
+  B <input type="radio" name="answerText" value="B"><br>
+
+  이유: <input type="text" name="content"><br>
+
+  <button type="submit">투표</button>
+</form>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<h1>질문 목록</h1>
+
+<a href="/questions/new">질문 만들기</a>
+
+<!-- 🔥 랜덤 질문 보기 버튼 -->
+<a href="/questions/random">
+  <button>랜덤 질문 보기</button>
+</a>
+
+<ul>
+  <li th:each="q : ${questions}">
+    <a th:href="@{|/questions/${q.id}|}" th:text="${q.title}"></a>
+  </li>
+</ul>
+
+</body>
+</html>
